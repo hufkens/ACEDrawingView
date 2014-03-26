@@ -44,17 +44,18 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
         self.lineCapStyle = kCGLineCapRound;
         path = CGPathCreateMutable();
     }
+    
     return self;
 }
 
 - (void)setInitialPoint:(CGPoint)firstPoint
 {
-    //[self moveToPoint:firstPoint];
+    [self moveToPoint:firstPoint];
 }
 
 - (void)moveFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint
 {
-    //[self addQuadCurveToPoint:midPoint(endPoint, startPoint) controlPoint:startPoint];
+    [self addQuadCurveToPoint:midPoint(endPoint, startPoint) controlPoint:startPoint];
 }
 
 - (CGRect)addPathPreviousPreviousPoint:(CGPoint)p2Point withPreviousPoint:(CGPoint)p1Point withCurrentPoint:(CGPoint)cpoint {
@@ -92,6 +93,33 @@ CGPoint midPoint(CGPoint p1, CGPoint p2)
     #if !ACE_HAS_ARC
     [super dealloc];
     #endif
+}
+
+#pragma mark - NSCoding Protocol
+
+- (void)encodeWithCoder:(NSCoder *)encoder {    
+    [encoder encodeFloat:[self lineAlpha] forKey:@"lineAlpha"];
+    [encoder encodeObject:[self lineColor] forKey:@"lineColor"];
+    [encoder encodeFloat:[self lineWidth] forKey:@"lineWidth"];
+    [encoder encodeObject:[UIBezierPath bezierPathWithCGPath:path] forKey:@"path"];
+    
+    [super encodeWithCoder:encoder];
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super init];
+    if (self != nil) {
+        
+    }
+    
+    [self setLineAlpha:[decoder decodeFloatForKey:@"lineAlpha"]];
+    [self setLineColor:[decoder decodeObjectForKey:@"lineColor"]];
+    [self setLineWidth:[decoder decodeFloatForKey:@"lineWidth"]];
+    
+    UIBezierPath *bezier = [decoder decodeObjectForKey:@"path"];
+    path = (CGMutablePathRef)CGPathRetain(bezier.CGPath);
+    
+    return self;
 }
 
 @end

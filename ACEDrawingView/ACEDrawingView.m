@@ -41,7 +41,6 @@
     CGPoint previousPoint2;
 }
 
-@property (nonatomic, strong) NSMutableArray *pathArray;
 @property (nonatomic, strong) NSMutableArray *bufferArray;
 @property (nonatomic, strong) id<ACEDrawingTool> currentTool;
 @property (nonatomic, strong) UIImage *image;
@@ -72,7 +71,7 @@
 - (void)configure
 {
     // init the private arrays
-    self.pathArray = [NSMutableArray array];
+    _pathArray = [NSMutableArray array];
     self.bufferArray = [NSMutableArray array];
     
     // set the default values for the public properties
@@ -100,16 +99,16 @@
 
 - (void)updateCacheImage:(BOOL)redraw
 {
+    //NSLog(@"updateCacheImage:START");
     // init a context
+    //NSLog(@"init a context");
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, 0.0);
     
     if (redraw) {
         // erase the previous image
         self.image = nil;
         
-        // load previous image (if returning to screen)
-        [[self.prev_image copy] drawInRect:self.bounds];
-        
+        //NSLog(@"Redraw Tools");
         // I need to redraw all the lines
         for (id<ACEDrawingTool> tool in self.pathArray) {
             [tool draw];
@@ -122,8 +121,10 @@
     }
     
     // store the image
+    //NSLog(@"store the image");
     self.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+    //NSLog(@"updateCacheImage:DONE");
 }
 
 - (id<ACEDrawingTool>)toolWithCurrentSettings
@@ -252,15 +253,23 @@
     [self touchesEnded:touches withEvent:event];
 }
 
+#pragma mark - Load Data
+
+- (void)setPathArray:(NSArray *)pathArray
+{
+    if (!pathArray) {
+        return;
+    }
+    _pathArray = [NSMutableArray arrayWithArray:pathArray];
+    [self updateCacheImage:YES];
+    [self setNeedsDisplay];
+}
 
 #pragma mark - Load Image
 
 - (void)loadImage:(UIImage *)image
 {
     self.image = image;
-    
-    //save the loaded image to persist after an undo step
-    self.prev_image = [image copy];
     
     // when loading an external image, I'm cleaning all the paths and the undo buffer
     [self.bufferArray removeAllObjects];
@@ -290,7 +299,6 @@
 {
     [self.bufferArray removeAllObjects];
     [self.pathArray removeAllObjects];
-    self.prev_image = nil;
     [self updateCacheImage:YES];
     [self setNeedsDisplay];
 }
@@ -343,7 +351,6 @@
     self.bufferArray = nil;
     self.currentTool = nil;
     self.image = nil;
-    self.prev_image = nil;
     [super dealloc];
 }
 

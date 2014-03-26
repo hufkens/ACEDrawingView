@@ -48,11 +48,10 @@ typedef enum {
 @property (nonatomic, strong) UIColor *lineColor;
 @property (nonatomic, assign) CGFloat lineWidth;
 @property (nonatomic, assign) CGFloat lineAlpha;
-
+@property (nonatomic, strong) NSMutableArray *pathArray;
 
 // get the current drawing
 @property (nonatomic, strong, readonly) UIImage *image;
-@property (nonatomic, strong) UIImage *prev_image;
 @property (nonatomic, readonly) NSUInteger undoSteps;
 
 // load external image
